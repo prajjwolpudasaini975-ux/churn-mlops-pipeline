@@ -18,7 +18,7 @@ mlflow.db
 Data/
 
 # Model artifacts (too large for GitHub)
-models/churn_pipeline.joblib
+
 models/xgb_churn_model.joblib
 models/reference_data.csv
 
