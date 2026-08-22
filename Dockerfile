@@ -34,6 +34,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # frequently (code) AFTER things that change rarely (dependencies).
 COPY src/ ./src/
 COPY models/ ./models/
+COPY static/ ./static/
 COPY main.py .
 
 # Step 6: Expose port 8000 so the outside world can reach the API.

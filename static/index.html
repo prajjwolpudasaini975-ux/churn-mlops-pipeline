@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Churn Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f4f8;
+    --surface: #ffffff;
+    --surface-2: #f8f9fc;
+    --border: #e6e8ef;
+    --text: #14161c;
+    --text-muted: #6b7280;
+    --accent: #6366f1;
+    --accent-2: #8b5cf6;
+    --accent-soft: #eef0ff;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --safe: #16a34a;
+    --safe-bg: #f0fdf4;
+    --radius: 16px;
+    --shadow: 0 1px 2px rgba(16,24,40,0.04), 0 8px 24px rgba(16,24,40,0.06);
+    --shadow-lg: 0 4px 12px rgba(99,102,241,0.18), 0 12px 32px rgba(16,24,40,0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0c10;
+      --surface: #16181e;
+      --surface-2: #1c1f27;
+      --border: #292c35;
+      --text: #edeef2;
+      --text-muted: #8b8f9a;
+      --accent: #818cf8;
+      --accent-2: #a78bfa;
+      --accent-soft: #211f3d;
+      --danger: #f87171;
+      --danger-bg: #2a1414;
+      --safe: #4ade80;
+      --safe-bg: #0f2417;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+      --shadow-lg: 0 4px 16px rgba(129,140,248,0.15), 0 12px 32px rgba(0,0,0,0.4);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(720px 360px at 12% -10%, var(--accent-soft) 0%, transparent 65%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+
+  header {
+    margin-bottom: 36px;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 5px 11px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+
+  .eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--safe);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--safe) 25%, transparent);
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 6px;
+    letter-spacing: -0.03em;
+    background: linear-gradient(120deg, var(--text) 40%, var(--accent) 120%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  header p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.96rem;
+    max-width: 52ch;
+    line-height: 1.5;
+  }
+
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0 0;
+  }
+
+  .preset-btn {
+    appearance: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .preset-btn:hover { border-color: var(--accent); box-shadow: var(--shadow); transform: translateY(-1px); }
+  .preset-btn .swatch { width: 8px; height: 8px; border-radius: 50%; }
+  .preset-btn.low .swatch { background: var(--safe); }
+  .preset-btn.high .swatch { background: var(--danger); }
+
+  form {
+    margin-top: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px;
+  }
+
+  fieldset {
+    border: none;
+    margin: 0 0 32px;
+    padding: 0;
+  }
+
+  fieldset:last-of-type { margin-bottom: 0; }
+
+  legend {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    padding: 0 0 18px;
+    width: 100%;
+  }
+
+  legend .icon-wrap {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  legend .icon-wrap svg { width: 16px; height: 16px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+  }
+
+  .field label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .field .hint {
+    display: block;
+    font-size: 0.74rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+    line-height: 1.35;
+  }
+
+  .field input,
+  .field select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  button[type="submit"] {
+    appearance: none;
+    border: none;
+    background: linear-gradient(120deg, var(--accent), var(--accent-2));
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.94rem;
+    font-weight: 700;
+    padding: 12px 26px;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  }
+
+  button[type="submit"]:hover { transform: translateY(-1px); }
+  button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .error {
+    color: var(--danger);
+    font-size: 0.85rem;
+    display: none;
+    font-weight: 500;
+  }
+
+  #result {
+    margin-top: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px;
+    display: none;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  #result.show {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    flex-wrap: wrap;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .gauge-wrap {
+    position: relative;
+    width: 132px;
+    height: 132px;
+    flex-shrink: 0;
+  }
+
+  .gauge-wrap svg { transform: rotate(-90deg); }
+
+  .gauge-track { stroke: var(--border); }
+
+  .gauge-fill {
+    stroke: var(--accent);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease;
+  }
+
+  .gauge-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gauge-center .pct {
+    font-family: "Roboto Mono", monospace;
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .gauge-center .pct-label {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+
+  .result-details {
+    flex: 1;
+    min-width: 220px;
+  }
+
+  .badge {
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .badge.churn { color: var(--danger); background: var(--danger-bg); }
+  .badge.safe { color: var(--safe); background: var(--safe-bg); }
+
+  .threshold-note {
+    margin-top: 14px;
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .threshold-note code {
+    font-family: "Roboto Mono", monospace;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 40px 16px 64px; }
+    form, #result { padding: 22px; }
+    header h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow"><span class="dot"></span> XGBoost · 99.3% ROC-AUC</div>
+      <h1>Churn Predictor</h1>
+      <p>Estimate the likelihood that a credit card customer closes their account, based on the same 18 signals the production model was trained on.</p>
+      <div class="presets">
+        <button type="button" class="preset-btn high" data-preset="high">
+          <span class="swatch"></span> Load at-risk example
+        </button>
+        <button type="button" class="preset-btn low" data-preset="low">
+          <span class="swatch"></span> Load loyal-customer example
+        </button>
+      </div>
+    </header>
+
+    <form id="churn-form">
+      <fieldset>
+        <legend>
+          <span class="icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          Demographics
+        </legend>
+        <div class="grid">
+          <div class="field">
+            <label for="Customer_Age">Age</label>
+            <span class="hint">Customer's age in years</span>
+            <input type="number" id="Customer_Age" required value="45" min="18" max="100">
+          </div>
+          <div class="field">
+            <label for="Gender">Gender</label>
+            <span class="hint">As recorded on the account</span>
+            <select id="Gender">
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="Dependent_count">Dependents</label>
+            <span class="hint">Number of dependents supported</span>
+            <input type="number" id="Dependent_count" required value="3" min="0" max="10">
+          </div>
+          <div class="field">
+            <label for="Education_Level">Education</label>
+            <span class="hint">Highest level attained</span>
+            <select id="Education_Level">
+              <option>Uneducated</option>
+              <option>High School</option>
+              <option>College</option>
+              <option selected>Graduate</option>
+              <option>Post-Graduate</option>
+              <option>Doctorate</option>
+              <option>Unknown</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="Marital_Status">Marital Status</label>
+            <span class="hint">Current marital status</span>
+            <select id="Marital_Status">
+              <option>Single</option>
+              <option selected>Married</option>
+              <option>Unknown</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="Income_Category">Income</label>
+            <span class="hint">Annual income bracket</span>
+            <select id="Income_Category">
+              <option>Less than $40K</option>
+              <option>$40K - $60K</option>
+              <option selected>$60K - $80K</option>
+              <option>$80K - $120K</option>
+              <option>$120K +</option>
+              <option>Unknown</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="Card_Category">Card Category</label>
+            <span class="hint">Credit card tier held</span>
+            <select id="Card_Category">
+              <option selected>Blue</option>
+              <option>Silver</option>
+              <option>Gold</option>
+              <option>Platinum</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>
+          <span class="icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="7" height="10" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+          </span>
+          Relationship
+        </legend>
+        <div class="grid">
+          <div class="field">
+            <label for="Months_on_book">Months on Book</label>
+            <span class="hint">Tenure as a customer</span>
+            <input type="number" id="Months_on_book" required value="36" min="0">
+          </div>
+          <div class="field">
+            <label for="Total_Relationship_Count">Products Held</label>
+            <span class="hint">Bank products held (cards, loans, etc.) — 2 or fewer plus low transactions is the strongest churn signal in this dataset</span>
+            <input type="number" id="Total_Relationship_Count" required value="2" min="0" max="10">
+          </div>
+          <div class="field">
+            <label for="Months_Inactive_12_mon">Months Inactive</label>
+            <span class="hint">Months with no activity, past 12 months</span>
+            <input type="number" id="Months_Inactive_12_mon" required value="3" min="0" max="12">
+          </div>
+          <div class="field">
+            <label for="Contacts_Count_12_mon">Contacts (12mo)</label>
+            <span class="hint">Times the customer contacted support</span>
+            <input type="number" id="Contacts_Count_12_mon" required value="3" min="0" max="12">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>
+          <span class="icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          Financial Activity
+        </legend>
+        <div class="grid">
+          <div class="field">
+            <label for="Credit_Limit">Credit Limit</label>
+            <span class="hint">Credit limit on the card ($)</span>
+            <input type="number" id="Credit_Limit" required value="4500" step="0.01" min="0">
+          </div>
+          <div class="field">
+            <label for="Total_Revolving_Bal">Revolving Balance</label>
+            <span class="hint">Balance carried month to month ($)</span>
+            <input type="number" id="Total_Revolving_Bal" required value="1200" min="0">
+          </div>
+          <div class="field">
+            <label for="Total_Amt_Chng_Q4_Q1">Amount Change (Q4/Q1)</label>
+            <span class="hint">Ratio of spend in Q4 vs Q1</span>
+            <input type="number" id="Total_Amt_Chng_Q4_Q1" required value="0.6" step="0.001" min="0">
+          </div>
+          <div class="field">
+            <label for="Total_Trans_Amt">Total Transaction Amount</label>
+            <span class="hint">Total spend, past 12 months ($)</span>
+            <input type="number" id="Total_Trans_Amt" required value="2500" min="0">
+          </div>
+          <div class="field">
+            <label for="Total_Trans_Ct">Total Transaction Count</label>
+            <span class="hint">Number of transactions, past 12 months</span>
+            <input type="number" id="Total_Trans_Ct" required value="40" min="0">
+          </div>
+          <div class="field">
+            <label for="Total_Ct_Chng_Q4_Q1">Count Change (Q4/Q1)</label>
+            <span class="hint">Ratio of transaction count, Q4 vs Q1</span>
+            <input type="number" id="Total_Ct_Chng_Q4_Q1" required value="0.5" step="0.001" min="0">
+          </div>
+          <div class="field">
+            <label for="Avg_Utilization_Ratio">Avg Utilization Ratio</label>
+            <span class="hint">Balance ÷ credit limit, averaged</span>
+            <input type="number" id="Avg_Utilization_Ratio" required value="0.267" step="0.001" min="0" max="1">
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" id="submit-btn">Predict Churn Risk</button>
+        <span class="error" id="error-msg"></span>
+      </div>
+    </form>
+
+    <div id="result">
+      <div class="gauge-wrap">
+        <svg width="132" height="132" viewBox="0 0 132 132">
+          <circle class="gauge-track" cx="66" cy="66" r="54" fill="none" stroke-width="12"/>
+          <circle class="gauge-fill" id="gauge-fill" cx="66" cy="66" r="54" fill="none" stroke-width="12"
+                  stroke-dasharray="339.292" stroke-dashoffset="339.292"/>
+        </svg>
+        <div class="gauge-center">
+          <div class="pct" id="prob-value">0%</div>
+          <div class="pct-label">churn risk</div>
+        </div>
+      </div>
+      <div class="result-details">
+        <div class="badge" id="badge">—</div>
+        <div class="threshold-note" id="threshold-note"></div>
+      </div>
+    </div>
+
+    <footer>XGBoost pipeline · served locally via FastAPI</footer>
+  </div>
+
+  <script>
+    const form = document.getElementById('churn-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const errorMsg = document.getElementById('error-msg');
+    const resultEl = document.getElementById('result');
+    const probValue = document.getElementById('prob-value');
+    const badge = document.getElementById('badge');
+    const gaugeFill = document.getElementById('gauge-fill');
+    const thresholdNote = document.getElementById('threshold-note');
+
+    const GAUGE_CIRCUMFERENCE = 339.292;
+
+    const numericIds = [
+      'Customer_Age', 'Dependent_count', 'Months_on_book', 'Total_Relationship_Count',
+      'Months_Inactive_12_mon', 'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
+      'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt', 'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1',
+      'Avg_Utilization_Ratio'
+    ];
+    const stringIds = [
+      'Gender', 'Education_Level', 'Marital_Status', 'Income_Category', 'Card_Category'
+    ];
+
+    const presets = {
+      high: {
+        Customer_Age: 45, Gender: 'M', Dependent_count: 3, Education_Level: 'Graduate',
+        Marital_Status: 'Married', Income_Category: '$60K - $80K', Card_Category: 'Blue',
+        Months_on_book: 36, Total_Relationship_Count: 2, Months_Inactive_12_mon: 3,
+        Contacts_Count_12_mon: 3, Credit_Limit: 4500.0, Total_Revolving_Bal: 1200,
+        Total_Amt_Chng_Q4_Q1: 0.6, Total_Trans_Amt: 2500, Total_Trans_Ct: 40,
+        Total_Ct_Chng_Q4_Q1: 0.5, Avg_Utilization_Ratio: 0.267
+      },
+      low: {
+        Customer_Age: 40, Gender: 'F', Dependent_count: 2, Education_Level: 'Graduate',
+        Marital_Status: 'Married', Income_Category: '$40K - $60K', Card_Category: 'Blue',
+        Months_on_book: 36, Total_Relationship_Count: 6, Months_Inactive_12_mon: 1,
+        Contacts_Count_12_mon: 2, Credit_Limit: 12000.0, Total_Revolving_Bal: 800,
+        Total_Amt_Chng_Q4_Q1: 0.75, Total_Trans_Amt: 4500, Total_Trans_Ct: 80,
+        Total_Ct_Chng_Q4_Q1: 0.7, Avg_Utilization_Ratio: 0.07
+      }
+    };
+
+    document.querySelectorAll('.preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const values = presets[btn.dataset.preset];
+        for (const [id, value] of Object.entries(values)) {
+          document.getElementById(id).value = value;
+        }
+      });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Predicting…';
+
+      const payload = {};
+      for (const id of stringIds) payload[id] = document.getElementById(id).value;
+      for (const id of numericIds) payload[id] = Number(document.getElementById(id).value);
+
+      try {
+        const API_URL = window.location.origin;
+        const res = await fetch(`${API_URL}/predict`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const detail = await res.json().catch(() => null);
+          throw new Error(detail?.detail ? JSON.stringify(detail.detail) : `Request failed (${res.status})`);
+        }
+
+        const data = await res.json();
+        const pct = Math.round(data.churn_probability * 1000) / 10;
+        const isChurn = data.prediction === 'Attrited Customer';
+
+        probValue.textContent = `${pct}%`;
+        badge.textContent = isChurn ? '⚠ High Risk' : '✓ Low Risk';
+        badge.className = 'badge ' + (isChurn ? 'churn' : 'safe');
+        gaugeFill.style.stroke = isChurn ? 'var(--danger)' : 'var(--safe)';
+        gaugeFill.style.strokeDashoffset = String(GAUGE_CIRCUMFERENCE * (1 - pct / 100));
+        thresholdNote.innerHTML = `Classified as <strong>${data.prediction}</strong> at decision threshold <code>${data.threshold_used}</code>`;
+
+        resultEl.classList.add('show');
+        resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (err) {
+        errorMsg.textContent = err.message || 'Something went wrong. Is the API running?';
+        errorMsg.style.display = 'inline';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Predict Churn Risk';
+      }
+    });
+  </script>
+</body>
+</html>

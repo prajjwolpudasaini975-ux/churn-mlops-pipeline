@@ -17,8 +17,10 @@ only — remove it in production).
 """
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import pandas as pd
+from fastapi.responses import FileResponse
 
 from src.pipeline import load_pipeline, load_metadata
 
@@ -88,6 +90,12 @@ def root():
     return {"status": "alive", "model": "churn-predictor", "version": "1.0.0"}
 
 
+app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+
+@app.get("/app")                               # new endpoint
+def serve_frontend():
+    return FileResponse("static/index.html")
+
 @app.post("/predict", response_model=PredictionResponse)
 def predict(customer: CustomerData):
     """
@@ -110,3 +118,5 @@ def predict(customer: CustomerData):
         prediction=label,
         threshold_used=threshold,
     )
+
+
