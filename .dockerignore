@@ -1,0 +1,9 @@
+my_env/
+Notebooks/
+Data/
+mlflow.db
+mlflow_test.py
+requirements-dev.txt
+__pycache__/
+*.pyc
+.git/

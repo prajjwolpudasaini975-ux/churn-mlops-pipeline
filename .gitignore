@@ -1,0 +1,39 @@
+# Virtual environment
+my_env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# MLflow database (too large, contains local paths)
+mlflow.db
+
+# Raw data (too large for GitHub, document source in README instead)
+Data/
+
+# Model artifacts (too large for GitHub)
+models/churn_pipeline.joblib
+models/xgb_churn_model.joblib
+models/reference_data.csv
+
+# Keep metadata (small, useful for documentation)
+!models/model_metadata.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Environment variables (if you ever add secrets)
+.env
+
+# MLflow local file store (deprecated, using SQLite instead)
+mlruns/
