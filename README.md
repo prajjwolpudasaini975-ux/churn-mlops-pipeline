@@ -1,5 +1,6 @@
 # Credit Card Customer Churn Prediction
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-46E3B7?logo=render)](https://churn-mlops-pipeline.onrender.com/app)
 ![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688?logo=fastapi)
 ![XGBoost](https://img.shields.io/badge/XGBoost-2.1.1-orange)
@@ -15,12 +16,24 @@ following a complete 19-phase ML lifecycle.
 **Author:** Prajjwol Pudasaini
 
 ---
+## 🚀 Live Demo
+
+| | URL |
+|---|---|
+| **Frontend** | https://churn-mlops-pipeline.onrender.com/app |
+| **API Docs** | https://churn-mlops-pipeline.onrender.com/docs |
+| **Health Check** | https://churn-mlops-pipeline.onrender.com/ |
+
+> ⚠️ Hosted on Render's free tier — may take 30-60 seconds to wake up after inactivity.
+
+---
 
 ## Table of Contents
 
 - [Business Problem](#business-problem)
 - [Project Highlights](#project-highlights)
 - [Results](#results)
+- [Key Insights](#key-insights)
 - [Project Structure](#project-structure)
 - [Architecture](#architecture)
 - [Quickstart — Local](#quickstart--local)
@@ -97,6 +110,26 @@ costly than a false alarm (false positive). The model is optimised for
 XGBoost was selected for its superior performance across all metrics,
 particularly its **PR-AUC of 0.969** — the most informative metric under
 class imbalance, measuring performance across all possible thresholds.
+
+---
+
+## Key Insights
+
+## Key Insights
+
+### Feature Importance (SHAP)
+![SHAP Summary](assets/SHAP_plot.png)
+
+*`Total_Trans_Ct`, `Total_Revolving_Bal`, and `Total_Amt_Chng_Q4_Q1` are the 
+strongest predictors of churn. The engineered `high_risk_segment` feature (r=0.442) 
+ranks consistently high — validating the domain-driven feature engineering approach.*
+
+### Model Performance Metrics
+![Model Metrics](assets/Metrics.png)
+
+*XGBoost outperforms all baseline models across every metric, with PR-AUC of 0.969 
+— the most informative metric under class imbalance — significantly ahead of 
+Random Forest (0.98 ROC-AUC but weaker under imbalance) and Logistic Regression.*
 
 ---
 
